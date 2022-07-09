@@ -1,0 +1,86 @@
+[
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this blog"
+  },
+  {
+    "objectID": "posts/R-S3/quarto-slides.html#intro",
+    "href": "posts/R-S3/quarto-slides.html#intro",
+    "title": "R S3",
+    "section": "Intro",
+    "text": "Intro\n\nEverything that exists in R is an object\n\n— John Chambers\n\nWhile everything is an object, not everything is object-oriented.\n\n— Advanced R"
+  },
+  {
+    "objectID": "posts/R-S3/quarto-slides.html#base-objects-versus-oo-objects",
+    "href": "posts/R-S3/quarto-slides.html#base-objects-versus-oo-objects",
+    "title": "R S3",
+    "section": "Base objects versus OO objects",
+    "text": "Base objects versus OO objects\n\n# A base object\nlibrary(sloop)\n\nis.object(1:10)\n\n[1] FALSE\n\nsloop::otype(1:10)\n\n[1] \"base\"\n\n# An OO object\nis.object(mtcars)\n\n[1] TRUE\n\nsloop::otype(mtcars)\n\n[1] \"S3\"\n\n\nTechnically, the difference between base and OO objects is that OO objects have a class attribute:\n\nattr(1:10, \"class\")\n\nNULL\n\nattr(mtcars, \"class\")\n\n[1] \"data.frame\""
+  },
+  {
+    "objectID": "posts/R-S3/quarto-slides.html#class-versus-sloops3_class",
+    "href": "posts/R-S3/quarto-slides.html#class-versus-sloops3_class",
+    "title": "R S3",
+    "section": "class() versus sloop::s3_class()",
+    "text": "class() versus sloop::s3_class()\nclass() is safe to apply to S3 and S4 objects, but it returns misleading results when applied to base objects.\nIt is safer to use sloop::s3_class()\n\n\n[1] \"matrix\" \"array\" \n\n\n[1] \"matrix\"  \"integer\" \"numeric\"\n\n\n   print.matrix\n   print.integer\n   print.numeric\n=> print.default"
+  },
+  {
+    "objectID": "posts/R-S3/quarto-slides.html#base-type",
+    "href": "posts/R-S3/quarto-slides.html#base-type",
+    "title": "R S3",
+    "section": "Base type",
+    "text": "Base type\nWhile only OO objects have a class attribute, every object has a base type:\n\ntypeof(1:10)\n\n[1] \"integer\"\n\ntypeof(mtcars)\n\n[1] \"list\"\n\n\nBase types do not form an OOP system because functions that behave differently for different base types are primarily written in C code that uses switch statements."
+  },
+  {
+    "objectID": "posts/R-S3/quarto-slides.html#s3-basics",
+    "href": "posts/R-S3/quarto-slides.html#s3-basics",
+    "title": "R S3",
+    "section": "S3 Basics",
+    "text": "S3 Basics\nAn S3 object is a base type with at least a class attribute (other attributes may be used to store other data)\n\nf <- factor(c(\"a\", \"b\", \"c\"))\n\ntypeof(f)\n\n[1] \"integer\"\n\nattributes(f)\n\n$levels\n[1] \"a\" \"b\" \"c\"\n\n$class\n[1] \"factor\"\n\n# get the underlying base type\nunclass(f)\n\n[1] 1 2 3\nattr(,\"levels\")\n[1] \"a\" \"b\" \"c\""
+  },
+  {
+    "objectID": "posts/R-S3/quarto-slides.html#generic-function",
+    "href": "posts/R-S3/quarto-slides.html#generic-function",
+    "title": "R S3",
+    "section": "generic function",
+    "text": "generic function\nAn S3 object behaves differently from its underlying base type whenever it’s passed to a generic function\n\n# to test if a function is a generic\nsloop::ftype(print)\n\n[1] \"S3\"      \"generic\"\n\nf <- factor(c(\"a\", \"b\", \"c\"))\n\nprint(f) # print a factor\n\n[1] a b c\nLevels: a b c\n\nprint(unclass(f)) # print an integer vector\n\n[1] 1 2 3\nattr(,\"levels\")\n[1] \"a\" \"b\" \"c\""
+  },
+  {
+    "objectID": "posts/R-S3/quarto-slides.html#method-dispatch",
+    "href": "posts/R-S3/quarto-slides.html#method-dispatch",
+    "title": "R S3",
+    "section": "method dispatch",
+    "text": "method dispatch\n\nf <- factor(c(\"a\", \"b\", \"c\"))\nsloop::s3_dispatch(print(f))\n\n=> print.factor\n * print.default\n\nt <- Sys.Date()\nsloop::s3_dispatch(print(t))\n\n=> print.Date\n * print.default"
+  },
+  {
+    "objectID": "posts/R-S3/quarto-slides.html#s3-methods-source-code",
+    "href": "posts/R-S3/quarto-slides.html#s3-methods-source-code",
+    "title": "R S3",
+    "section": "S3 methods source code",
+    "text": "S3 methods source code\nS3 methods are not usually exported: they live only inside the package, and are not available from the global environment.\nsloop::s3_get_method() can be used to retrieve the code:\n\nsloop::s3_get_method(weighted.mean.Date)\n\nfunction (x, w, ...) \n.Date(weighted.mean(unclass(x), w, ...))\n<bytecode: 0x55cca6c8a960>\n<environment: namespace:stats>"
+  },
+  {
+    "objectID": "posts/R-S3/quarto-slides.html#s3-classes",
+    "href": "posts/R-S3/quarto-slides.html#s3-classes",
+    "title": "R S3",
+    "section": "S3 classes",
+    "text": "S3 classes\nS3 has no formal definitions of a class: to make an object an instance of a class, we simply set the class attribute\n\n# create and assign class in one step\nx <- structure(list(), class = \"my_class\")\n\n# create first and then set class\nx <- list()\nclass(x) <- \"my_class\""
+  },
+  {
+    "objectID": "posts/R-S3/quarto-slides.html#inheritance",
+    "href": "posts/R-S3/quarto-slides.html#inheritance",
+    "title": "R S3",
+    "section": "Inheritance",
+    "text": "Inheritance"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "yimu",
+    "section": "",
+    "text": "R S3\n\n\n\n\n\n\n\n\n\n\n\nJul 9, 2022\n\n\nJie Wang\n\n\n\n\n\n\nNo matching items"
+  }
+]
