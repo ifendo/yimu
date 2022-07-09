@@ -1,0 +1,155 @@
+---
+title: "R S3"
+author: "Jie Wang"
+date: "2022-07-09"
+categories: [R S3]
+format: 
+    revealjs:
+        theme: dark
+editor: visual
+image: "R-OOP.png"
+---
+
+## Intro
+
+> Everything that exists in R is an object
+
+--- John Chambers
+
+> While everything is an object, not everything is object-oriented.
+
+--- Advanced R
+
+## Base objects versus OO objects
+
+```{r}
+#| echo: true
+
+# A base object
+library(sloop)
+
+is.object(1:10)
+
+sloop::otype(1:10)
+
+# An OO object
+is.object(mtcars)
+sloop::otype(mtcars)
+```
+
+Technically, the difference between base and OO objects is that OO objects have a `class` attribute:
+
+```{r}
+#| echo: true
+
+attr(1:10, "class")
+
+attr(mtcars, "class")
+```
+
+## class() versus sloop::s3_class()
+
+`class()` is safe to apply to S3 and S4 objects, but it returns misleading results when applied to base objects.
+
+It is safer to use `sloop::s3_class()`
+
+```{r}
+x <- matrix(1:4, nrow = 2)
+
+class(x)
+
+# returns implicit class for method dispatch
+sloop::s3_class(x) 
+
+sloop::s3_dispatch(print(x))
+```
+
+## Base type
+
+While only OO objects have a `class` attribute, every object has a `base type`:
+
+```{r}
+#| echo: true
+
+typeof(1:10)
+typeof(mtcars)
+
+```
+
+Base types do not form an OOP system because functions that behave differently for different base types are primarily written in C code that uses switch statements.
+
+## S3 Basics
+
+An S3 object is a base type with at least a `class` attribute (other attributes may be used to store other data)
+
+```{r}
+#| echo: true
+
+f <- factor(c("a", "b", "c"))
+
+typeof(f)
+
+attributes(f)
+
+# get the underlying base type
+unclass(f)
+```
+
+## generic function
+
+An S3 object behaves differently from its underlying base type whenever it's passed to a **generic** function
+
+```{r}
+#| echo: true
+
+# to test if a function is a generic
+sloop::ftype(print)
+
+f <- factor(c("a", "b", "c"))
+
+print(f) # print a factor
+
+print(unclass(f)) # print an integer vector
+
+```
+
+## method dispatch
+
+```{r}
+#| echo: true
+
+f <- factor(c("a", "b", "c"))
+sloop::s3_dispatch(print(f))
+
+t <- Sys.Date()
+sloop::s3_dispatch(print(t))
+```
+
+## S3 methods source code
+
+S3 methods are not usually exported: they live only inside the package, and are not available from the global environment.
+
+`sloop::s3_get_method()` can be used to retrieve the code:
+
+```{r}
+#| echo: true
+
+sloop::s3_get_method(weighted.mean.Date)
+```
+
+## S3 classes
+
+S3 has no formal definitions of a class: to make an object an instance of a class, we simply set the `class` attribute
+
+```{r}
+#| echo: true
+
+# create and assign class in one step
+x <- structure(list(), class = "my_class")
+
+# create first and then set class
+x <- list()
+class(x) <- "my_class"
+```
+
+## Inheritance
